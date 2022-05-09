@@ -3,7 +3,8 @@ import os
 import openai
 from flask import Flask, redirect, render_template, request, url_for, Response
 
-from icalendar import Calendar, Event, vText
+from icalendar import Calendar, Event, Timezone
+import x_wr_timezone
 from datetime import datetime as DateTime
 import pytz
 
@@ -142,15 +143,25 @@ def event_dict_to_ical(
     # try:
     if tz == 'us-east':
         tz = 'America/New_York'
-    dt = DateTime(
-        int(year), int(month), int(day), int(hour), int(min), int(sec),
-        tzinfo=pytz.timezone(tz)
-    )
+    tzinfo = pytz.timezone(tz)
+    # https://stackoverflow.com/questions/25668415/why-does-python-new-york-time-zone-display-456-instead-400
+    dt = tzinfo.localize(DateTime(
+        int(year), int(month), int(day), 
+        hour=int(hour), minute=int(min), second=int(sec), microsecond=0,
+    ))
+    # Convert timezone to UTC.
+    dt = dt.astimezone(pytz.utc)
     event.add('dtstart', dt)
+    cal.add_component(event)
+
+    # And yet, still include a x-wr-timezone property
+    # so Google Calendar will know what timezone to use.
+    cal.add('x-wr-timezone', tz)
+    new_cal = x_wr_timezone.to_standard(cal)
+
     # except (TypeError, KeyError):
     #     pass
-    cal.add_component(event)
-    return cal.to_ical().decode('utf-8', 'ignore')
+    return new_cal.to_ical().decode('utf-8', 'ignore')
 
 
 
