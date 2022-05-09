@@ -3,10 +3,14 @@ import os
 import openai
 from flask import Flask, redirect, render_template, request, url_for, Response
 
+from icalendar import Calendar, Event, vText
+from datetime import datetime as DateTime
+import pytz
+
 from generate_training_JSONL import prepare_prompt, get_stop_tokens
 from json import loads
 from json.decoder import JSONDecodeError
-# from urllib.parse import urlencode
+
 
 STOP_TOKENS = get_stop_tokens()
 
@@ -84,7 +88,8 @@ def index():
             # engine="text-davinci-002",
             # model='curie:ft-personal-2022-05-06-18-46-42',
             # model='curie:ft-personal-2022-05-06-19-13-43',
-            model='curie:ft-personal-2022-05-06-22-13-43',
+            # model='curie:ft-personal-2022-05-06-22-13-43',
+            model='curie:ft-personal-2022-05-09-18-23-23',
             prompt=prepare_prompt(email),
             stop=STOP_TOKENS,
             temperature=0.6,
@@ -95,11 +100,11 @@ def index():
 
     return compose_results_page(results_html="")
 
+
 @app.route("/event.ics", methods=("GET",))
 def event_ics():
 
     request_args = dict(request.args)
-    print('Generating ICS from:', request_args)
     ical = event_dict_to_ical(**request_args)
 
     return Response(
@@ -108,27 +113,6 @@ def event_ics():
         headers={"Content-Disposition": "attachment;filename=event.ics"}
         )
 
-
-# def generate_prompt(email):
-#     return prompt_template + '''
-# ######
-# ====Email:====
-# {}
-# ====Parsed:====
-# '''.format(email)
-
-
-# def generate_prompt(animal):
-#     return """Suggest three names for an animal that is a superhero.
-
-# Animal: Cat
-# Names: Captain Sharpclaw, Agent Fluffball, The Incredible Feline
-# Animal: Dog
-# Names: Ruff the Protector, Wonder Canine, Sir Barks-a-Lot
-# Animal: {}
-# Names:""".format(
-#         animal.capitalize()
-#     )
 
 def event_dict_to_ical(
         location=None,
@@ -143,14 +127,16 @@ def event_dict_to_ical(
         url=None,
         description='',
     ):
-    from icalendar import Calendar, Event, vText
-    from datetime import datetime as DateTime
-    import pytz
+    
     cal = Calendar()
     event = Event()
     if url is not None:
         description = url + '\n\n' + description
-    event.add('summary', description)
+    event.add('description', description)
+    if title is not None:
+        event.add('summary', title)
+    if location is None:
+        location = url
     if location is not None:
         event.add('location', location)#vText(location)
     # try:
