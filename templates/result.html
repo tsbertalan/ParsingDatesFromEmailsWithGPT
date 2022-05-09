@@ -1,0 +1,9 @@
+<div class="result">
+	<emph>Parsed JSON:</emph> <pre style="white-space: pre-wrap;">{{ json_code }}</pre>
+	<br/>
+	{% if ics_link %}
+		<a href="{{ ics_link }}">ICS</a>
+	{% else %}
+		ICS link generation failed.
+	{% endif %}
+</div>

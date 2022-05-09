@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <head>
-  <title>OpenAI Quickstart</title>
+  <title>OpenAI Event Parsing</title>
   <link
     rel="shortcut icon"
     href="{{ url_for('static', filename='dog.png') }}"
@@ -10,12 +10,12 @@
 
 <body>
   <img src="{{ url_for('static', filename='dog.png') }}" class="icon" />
-  <h3>Name my pet</h3>
+  <h3>Parse an email for events</h3>
   <form action="/" method="post">
-    <input type="text" name="animal" placeholder="Enter an animal" required />
-    <input type="submit" value="Generate names" />
+    <textarea name="email" placeholder="Enter the email body" rows="10" cols="80" required></textarea>
+    <input type="submit" value="Parse events" />
   </form>
-  {% if result %}
-  <div class="result">{{ result }}</div>
+  {% if results %}
+    {{ results | safe }}
   {% endif %}
 </body>
