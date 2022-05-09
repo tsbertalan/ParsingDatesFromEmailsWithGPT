@@ -81,45 +81,9 @@ def compose_results_list_html(response_choices):
         except JSONDecodeError:
             ics_link = None
 
-        # syntax-highlight the JSON
-        # Automatically break long lines.
-        # broken = []
-        # target_length = 80
-        # for line in json_code.split('\n'):
-        #     if len(line) <= target_length:
-        #         broken.append(line)
-        #     else:
-        #         def show_s(s):
-        #             o = s[:10]+'...' '(len=%d)' % len(s)
-        #             return '>>>' + o + '<<<'
-        #         print('Breaking line:', show_s(line))
-        #         print('Stripped:', show_s(line.lstrip()))
-        #         white_space_at_start = len(line) - len(line.lstrip())
-        #         print('Num spaces:', white_space_at_start)
-        #         # Split the line into chunks of size target_length - num_spaces.
-        #         chunk_size = target_length - white_space_at_start
-        #         chunks = []
-        #         while len(line) > chunk_size:
-        #             chunks.append(line[:chunk_size])
-        #             line = line[chunk_size:]
-        #         chunks.append(line)
-                
-        #         # Add the chunks, with 2*num_spaces spaces at the start of each except the first.
-        #         for i, chunk in enumerate(chunks):
-        #             if i == 0:
-        #                 broken.append(chunk)
-        #             else:
-        #                 broken.append(' ' * white_space_at_start*2 + chunk)
-        # chunked_json_code = '\n'.join(broken)
+        s = highlight(json_code, JsonLexer(), HtmlFormatter(nowrap=False, ))
 
-        chunked_json_code = json_code
-
-        # chunked_json_code = dumps(loads(json_code), indent=2, separators=(',', ': '))
-
-
-        s = highlight(chunked_json_code, JsonLexer(), HtmlFormatter(nowrap=False, ))
-
-        # Get corresponding css style.
+        # Get corresponding css style and save to file.
         # pygments_css = HtmlFormatter(style='arduino').get_style_defs()
         # import os
         # HERE = os.path.dirname(os.path.realpath(__file__))

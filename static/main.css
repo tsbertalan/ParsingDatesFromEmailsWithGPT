@@ -70,6 +70,15 @@ input[type="submit"] {
   flex-direction: column;
 }
 
+/* Allow wrap in pre: https://css-tricks.com/snippets/css/make-pre-text-wrap/ */
+pre {
+  white-space: pre-wrap;       /* css-3 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+ }
+
 /* highlight div */
 .highlight {
   border-radius: 10px;
@@ -78,9 +87,8 @@ input[type="submit"] {
   height: 30ch;
   overflow-y: scroll;
   overflow-x: scroll;
-  resize: vertical;  /* allow user resizing */
+  resize: both;  /* allow user resizing */
   margin-bottom: 24px; 
-  word-wrap: break-word;
 }
 
 .abutton { 
