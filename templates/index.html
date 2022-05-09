@@ -3,13 +3,17 @@
   <title>OpenAI Event Parsing</title>
   <link
     rel="shortcut icon"
-    href="{{ url_for('static', filename='dog.png') }}"
+    href="{{ url_for('static', filename='event.svg') }}"
+  />
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='pygments.css') }}"
   />
   <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" />
 </head>
 
 <body>
-  <img src="{{ url_for('static', filename='dog.png') }}" class="icon" />
+  <img src="{{ url_for('static', filename='event.svg') }}" class="icon" />
   <h3>Parse an email for events</h3>
   <form action="/" method="post">
     <textarea name="email" placeholder="Enter the email body" rows="10" cols="80" required></textarea>

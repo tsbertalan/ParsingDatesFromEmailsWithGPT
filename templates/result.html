@@ -1,8 +1,13 @@
 <div class="result">
-	<emph>Parsed JSON:</emph> <pre style="white-space: pre-wrap;">{{ json_code }}</pre>
+	<emph>Parsed JSON:</emph>
+	<br/>
+	{{ json_code | safe }} 
 	<br/>
 	{% if ics_link %}
-		<a href="{{ ics_link }}">ICS</a>
+		<!-- <button type="button" class="abutton"><a href="{{ ics_link }}">ICS</a> -->
+		<form action="{{ ics_link }}" method="POST">
+			<input type="submit" value="Get ICS file" />
+		</form>
 	{% else %}
 		ICS link generation failed.
 	{% endif %}
