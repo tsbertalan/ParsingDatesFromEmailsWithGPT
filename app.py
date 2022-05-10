@@ -13,16 +13,25 @@ from pygments.lexers import JsonLexer
 from pygments.formatters import HtmlFormatter
 
 from generate_training_JSONL import prepare_prompt, get_stop_tokens
-from json import loads, dumps
-from json.decoder import JSONDecodeError
+import json
+#from json import json.loads, dumps
+#from json.decoder import json.decoder.JSONDecodeError
 
+#e = json.decoder.JSONDecodeError('wut', 'herp', 0)
+#print(isinstance(e, Exception))
+#print(isinstance(e, json.decoder.JSONDecodeError))
 
-def fuzzy_loads(s, n_recurse=0):
+def fuzzy_json_loads(s, n_recurse=0):
+    def say():
+        out = []
+        for i, l in enumerate(s.split('\n')):
+            out.append('%03d >%s' % (i, l))
+        return '\n'.join(out)
     try:
-        return loads(s)
-    except JSONDecodeError as e:
+        return json.loads(s)
+    except json.decoder.JSONDecodeError as e:
         if n_recurse > 5:
-            raise e
+            raise ValueError('(Original error:\n%s)\nFinally failed to parse:\n%s' % (e, say()))
         # print('Failed to parse JSON:', e)
         se = str(e)
         expecting_comma = "Expecting ',' delimiter" in se
@@ -30,7 +39,12 @@ def fuzzy_loads(s, n_recurse=0):
         n_lines = s.count('\n')
         if expecting_comma and abs(int(line_no) - n_lines) <= 1:
             # Try adding a closing "}".
-            return fuzzy_loads(s + '}', n_recurse=n_recurse+1)
+            return fuzzy_json_loads(s + '}', n_recurse=n_recurse+1)
+        elif 'Invalid \\escape' in se:
+            # Try to escape any backslashes:
+            return fuzzy_json_loads(s.replace('\\', '\\\\'))
+        else:
+            raise ValueError('(Original error:\n%s)\nCan\'t fix this JSON:\n%s' % (e, say()))
             
         # print('Line no:', line_no)
         # print('c.v. n lines =', n_lines)
@@ -73,13 +87,13 @@ def compose_results_list_html(response_choices):
         # print('Choice: >>>%s<<<' % s)
         json_code = get_first_result(s)
         # print('JSON from net to parse:', json_code)
-        try:
-            params = fuzzy_loads(json_code)
-            print('Parsed out choice:', params)
-            ics_link = url_for('event_ics', **flatten_dict(params))
-            print('Create ICS link:', ics_link)
-        except JSONDecodeError:
-            ics_link = None
+        #try:
+        params = fuzzy_json_loads(json_code)
+        print('Parsed out choice:', params)
+        ics_link = url_for('event_ics', **flatten_dict(params))
+        print('Create ICS link:', ics_link)
+        #except json.decoder.JSONDecodeError:
+        #    ics_link = None
 
         s = highlight(json_code, JsonLexer(), HtmlFormatter(nowrap=False, ))
 
@@ -113,7 +127,8 @@ def index():
                 # model='curie:ft-personal-2022-05-06-19-13-43',
                 # model='curie:ft-personal-2022-05-06-22-13-43',
                 # model='curie:ft-personal-2022-05-09-18-23-23',
-                model='curie:ft-personal-2022-05-09-19-50-12',
+                #model='curie:ft-personal-2022-05-09-19-50-12',
+                model="curie:ft-personal-2022-05-09-23-33-00",
                 prompt=prepare_prompt(email),
                 stop=STOP_TOKENS,
                 top_p=0.3,
@@ -207,7 +222,7 @@ def event_dict_to_ical(
 
 def create_ical_from_parsed(data_s):
     try:
-        data = fuzzy_loads(data_s)
+        data = fuzzy_json_loads(data_s)
     except ValueError:
         return '<emph>Failed to parse JSON to iCal.</emph>'
 
